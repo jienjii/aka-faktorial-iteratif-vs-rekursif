@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perbandingan Faktorial Iteratif vs Rekursif</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Perbandingan Waktu Eksekusi Faktorial Iteratif vs Rekursif</h1>
+    <div class="container">
+        <label for="inputN">Masukkan nilai n (bilangan bulat positif):</label>
+        <input type="number" id="inputN" min="1" placeholder="Contoh: 10">
+        <button id="calculateBtn">Hitung</button>
+    </div>
+    <div class="result" id="resultDiv" style="display: none;">
+        <h2>Hasil Perhitungan</h2>
+        <p><strong>Nilai n:</strong> <span id="nValue"></span></p>
+        <p><strong>Hasil Faktorial:</strong> <span id="factorialResult"></span></p>
+        <p><strong>Waktu Eksekusi Iteratif:</strong> <span id="iterativeTime"></span> ms</p>
+        <p><strong>Waktu Eksekusi Rekursif:</strong> <span id="recursiveTime"></span> ms</p>
+    </div>
+    <div class="chart-container">
+        <canvas id="timeChart"></canvas>
+    </div>
+
+    <script>
+        // Array untuk menyimpan data n dan waktu eksekusi
+        let nValues = [];
+        let iterativeTimes = [];
+        let recursiveTimes = [];
+
+        // Fungsi faktorial iteratif
+        function factorialIterative(n) {
+            let result = 1;
+            for (let i = 1; i <= n; i++) {
+                result *= i;
+            }
+            return result;
+        }
+
+        // Fungsi faktorial rekursif
+        function factorialRecursive(n) {
+            if (n === 0 || n === 1) {
+                return 1;
+            }
+            return n * factorialRecursive(n - 1);
+        }
+
+        // Inisialisasi chart
+        const ctx = document.getElementById('timeChart').getContext('2d');
+        const timeChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: nValues,
+                datasets: [{
+                    label: 'Waktu Iteratif (ms)',
+                    data: iterativeTimes,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: false,
+                }, {
+                    label: 'Waktu Rekursif (ms)',
+                    data: recursiveTimes,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Nilai n'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Waktu Eksekusi (ms)'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Event listener untuk tombol hitung
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            const n = parseInt(document.getElementById('inputN').value);
+            if (isNaN(n) || n < 1) {
+                alert('Masukkan bilangan bulat positif yang valid.');
+                return;
+            }
+
+            // Hitung faktorial iteratif dan ukur waktu
+            let startIterative = performance.now();
+            const resultIterative = factorialIterative(n);
+            let endIterative = performance.now();
+            const timeIterative = endIterative - startIterative;
+
+            // Hitung faktorial rekursif dan ukur waktu
+            let startRecursive = performance.now();
+            const resultRecursive = factorialRecursive(n);
+            let endRecursive = performance.now();
+            const timeRecursive = endRecursive - startRecursive;
+
+            // Pastikan hasil sama (untuk validasi)
+            if (resultIterative !== resultRecursive) {
+                alert('Error: Hasil faktorial tidak sama!');
+                return;
+            }
+
+            // Tampilkan hasil
+            document.getElementById('nValue').textContent = n;
+            document.getElementById('factorialResult').textContent = resultIterative;
+            document.getElementById('iterativeTime').textContent = timeIterative.toFixed(4);
+            document.getElementById('recursiveTime').textContent = timeRecursive.toFixed(4);
+            document.getElementById('resultDiv').style.display = 'block';
+
+            // Simpan data ke array
+            nValues.push(n);
+            iterativeTimes.push(timeIterative);
+            recursiveTimes.push(timeRecursive);
+
+            // Update chart
+            timeChart.update();
+        });
+    </script>
+</body>
+</html>
